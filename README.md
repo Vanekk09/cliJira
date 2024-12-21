@@ -1,0 +1,2 @@
+# cliJira
+learning Rust lang
