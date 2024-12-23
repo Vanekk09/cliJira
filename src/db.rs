@@ -4,7 +4,7 @@ use std::fs::{read_to_string, write};
 use serde_json::{from_str, to_string};
 
 pub struct JiraDatabase {
-    database: Box<dyn Database>
+    pub database: Box<dyn Database>
 }
 
 impl JiraDatabase {
@@ -62,7 +62,8 @@ impl JiraDatabase {
     pub fn delete_story(&self, epic_id: u32, story_id: u32) -> Result<()> {
         let mut db_state = self.database.read_db()?;
 
-        db_state.stories.remove(&story_id);
+        db_state.stories.remove(&story_id)
+            .ok_or(anyhow!("Story not found"))?;
         db_state.epics.get_mut(&epic_id)
             .ok_or(anyhow!("Epic not found"))?
             .stories.retain(|id| *id != story_id);
@@ -97,7 +98,7 @@ impl JiraDatabase {
     }
 }
 
-trait Database {
+pub trait Database {
     fn read_db(&self) -> Result<DBState>;
     fn write_db(&self, db_state: &DBState) -> Result<()>;
 }
